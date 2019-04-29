@@ -36,14 +36,10 @@
  * lookup operations, as all proper crypto code must be.
  */
 
-#include <stdio.h>
+
 #include "shamir.h"
 #include <string.h>
 #include "memzero.h"
-int main (void) {
-
-   printf("The value of square3()");
-}
 
 static void bitslice(uint32_t r[8], const uint8_t *x, size_t len) {
   size_t bit_idx, arr_idx;
@@ -323,12 +319,12 @@ bool shamir_interpolate(uint8_t *result, uint8_t result_index,
     unbitslice(result, secret, len);
   }
 
-  memzero(x, sizeof(x));
-  memzero(xs, sizeof(xs));
-  memzero(ys, sizeof(ys));
-  memzero(num, sizeof(num));
-  memzero(denom, sizeof(denom));
-  memzero(tmp, sizeof(tmp));
-  memzero(secret, sizeof(secret));
+  // memzero(x, sizeof(x));
+  // memzero(xs, sizeof(xs));
+  // memzero(ys, sizeof(ys));
+  // memzero(num, sizeof(num));
+  // memzero(denom, sizeof(denom));
+  // memzero(tmp, sizeof(tmp));
+  // memzero(secret, sizeof(secret));
   return ret;
 }
