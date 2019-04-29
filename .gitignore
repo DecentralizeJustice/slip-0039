@@ -1,3 +1,1 @@
-**/shamir/*.o
-**/shamir/*.js
-**/shamir/*.wasm
+**/shamir/build/*.o

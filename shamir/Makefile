@@ -1,13 +1,15 @@
 CC = emcc
 target = output.js
+OBJDIR = build/
+JAVA = javascript/
 
-$(target): main.o
-	$(CC) main.o -o $(target)
-main.o: main.c shamir.o
-	$(CC) -c main.c
-shamir.o: shamir.c shamir.h memzero.o
-	$(CC) -c shamir.c
-memzero.o: memzero.c memzero.h
-	$(CC) -c memzero.c
+$(JAVA)$(target): $(OBJDIR)main.o
+	$(CC) $(OBJDIR)main.o -o $(JAVA)$(target)
+$(OBJDIR)main.o: main.c $(OBJDIR)shamir.o
+	$(CC) -c main.c -o $(OBJDIR)
+$(OBJDIR)shamir.o: shamir.c shamir.h $(OBJDIR)memzero.o
+	$(CC) -c shamir.c -o $(OBJDIR)
+$(OBJDIR)memzero.o: memzero.c memzero.h
+	$(CC) -c memzero.c -o $(OBJDIR)
 clean :
-	rm output *.o *.out *.out.js *.out.wasm *.js *.wasm
+	rm  $(JAVA)*.js $(JAVA)*.wasm $(OBJDIR)*.o
