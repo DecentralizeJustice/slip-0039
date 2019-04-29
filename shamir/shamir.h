@@ -28,7 +28,6 @@
  */
 
 #ifndef __SHAMIR_H__
-
 #define __SHAMIR_H__
 
 #include <stdbool.h>
