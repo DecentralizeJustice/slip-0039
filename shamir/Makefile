@@ -2,9 +2,10 @@ CC = emcc
 target = output.js
 OBJDIR = build/
 JAVA = javascript/
-
+FLAGS = -s EXPORTED_FUNCTIONS='["_main", "_a"]'\
+-s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "cwrap"]' -s SINGLE_FILE=1
 $(JAVA)$(target): $(OBJDIR)main.o
-	$(CC) $(OBJDIR)main.o -o $(JAVA)$(target)
+	$(CC) $(OBJDIR)main.o -o $(JAVA)$(target) $(FLAGS)
 $(OBJDIR)main.o: main.c $(OBJDIR)shamir.o
 	$(CC) -c main.c -o $(OBJDIR)
 $(OBJDIR)shamir.o: shamir.c shamir.h $(OBJDIR)memzero.o
@@ -12,4 +13,4 @@ $(OBJDIR)shamir.o: shamir.c shamir.h $(OBJDIR)memzero.o
 $(OBJDIR)memzero.o: memzero.c memzero.h
 	$(CC) -c memzero.c -o $(OBJDIR)
 clean :
-	rm  $(JAVA)*.js $(JAVA)*.wasm $(OBJDIR)*.o
+	rm  $(JAVA)output.js $(JAVA)*.wasm $(OBJDIR)*.o
