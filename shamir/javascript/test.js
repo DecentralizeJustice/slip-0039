@@ -1,8 +1,11 @@
-const em_module = require('./output.js')
+const emModule = require('./output.js')
 
-const js_run = function () {
-  let a = em_module.cwrap('a', 'number', ['number'])
-  console.log(a(12))
+const jsRun = function () {
+  let shamirInterpolate =
+    emModule.cwrap('shamirInterpolate', 'array', ['array', 'array', 'array', 'array', 'array', 'number'])
+  let interprolate = shamirInterpolate(12)
+
+  console.log(interprolate)
 }
 
-global.js_run = js_run
+global.js_run = jsRun

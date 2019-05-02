@@ -7,11 +7,14 @@
 /* funcs.c  -- Examples of function declarations, definitions, and use
  */
 
- #include <emscripten.h>
-#include <math.h>
+#include <emscripten.h>
+#include "shamir.h"
 
-int a(int x) {
-  return sqrt(x);
+size_t shamirInterpolate(size_t x) {
+  return shamir_interpolate(uint8_t result, uint8_t result_index,
+                          const uint8_t share_indices,
+                          const uint8_t share_values, uint8_t share_count,
+                          size_t len);
  }
 
  int main() {

@@ -2,8 +2,8 @@ CC = emcc
 target = output.js
 OBJDIR = build/
 JAVA = javascript/
-FLAGS = -s EXPORTED_FUNCTIONS='["_main", "_a"]'\
--s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "cwrap"]' -s SINGLE_FILE=1
+FLAGS = -s EXPORTED_FUNCTIONS='["_main", "_shamirInterpolate"]'\
+-s EXTRA_EXPORTED_RUNTIME_METHODS='["cwrap"]' -s SINGLE_FILE=1
 $(JAVA)$(target): $(OBJDIR)main.o
 	$(CC) $(OBJDIR)main.o -o $(JAVA)$(target) $(FLAGS)
 $(OBJDIR)main.o: main.c $(OBJDIR)shamir.o
