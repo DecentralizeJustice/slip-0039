@@ -1,46 +1,34 @@
-/*
- * This file is part of the TREZOR project, https://trezor.io/
- *
- * Copyright (c) SatoshiLabs
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
 
+
+#include "memzero.h"
+#include "memzero.c"
+#include "shamir.c"
 #include "shamir.h"
-
-#define SHAMIR_MAX_SHARE_COUNT 16
 #include <stdio.h>
-#define N 16
+#include <stdlib.h>
+#include<time.h>
+#define SHAMIR_MAX_SHARE_COUNT 16
+
 
 int main(void) {
-  int first, second;
+  srand(time(0));
+  uint8_t results[16];//128 bytes
+  uint8_t result_index = 1;
+  uint8_t share_indices[SHAMIR_MAX_SHARE_COUNT] = {0,1};
+  const uint8_t *share_values[SHAMIR_MAX_SHARE_COUNT];
+  uint8_t share_count = 2;
+  size_t len = 16; //128 bytes
 
-  printf("Enter two integers > ");
-  scanf("%d %d", &first, &second);
-  printf("The two numbers are: %d  %d\n", first, second);
-  printf("Their sum is %d\n", first+second);
-  
+  for(int i = 0; i<share_count; i++){
+      uint8_t temparray[len];
+      for(int i = 0; i<len; i++){
+          temparray[i]= rand() % 256;
+      }
+      share_values[i] = temparray;
+  }
+
+  bool test = shamir_interpolate(results, result_index,share_indices,share_values,share_count,len);
+  printf("Test result was %d\n", test);
+  return 0;
 }
-/// def interpolate(shares, x) -> bytes:
-///     '''
-///     Returns f(x) given the Shamir shares (x_1, f(x_1)), ... , (x_k, f(x_k)).
-///     :param shares: The Shamir shares.
-///     :type shares: A list of pairs (x_i, y_i), where x_i is an integer and
-///         y_i is an array of bytes representing the evaluations of the
-///         polynomials in x_i.
-///     :param int x: The x coordinate of the result.
-///     :return: Evaluations of the polynomials in x.
-///     :rtype: Array of bytes.
-///     '''
