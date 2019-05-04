@@ -1,8 +1,7 @@
 
 
-
-#include "memzero.c"
 #include "shamir.c"
+#include "memzero.c"
 #include <stdio.h>
 #include <stdlib.h>
 #include<time.h>
