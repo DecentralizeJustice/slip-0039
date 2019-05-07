@@ -9,14 +9,12 @@ function bitsToWords (n) {
 const radixBits = 10
 // The number of words in the wordlist.
 const radix = Math.pow(2, radixBits)
-
 // The length of the random identifier in bits.
 const idLenghthBits = 15
-
 // The length of the iteration exponent in bits.
 const iterationExpLengthBits = 5
 // The length of the random identifier and iteration exponent in words.
-const idExpLengthWords = bitsToWords(ID_LENGTH_BITS + ITERATION_EXP_LENGTH_BITS)
+const idExpLengthWords = bitsToWords(idLenghthBits + iterationExpLengthBits)
 // The maximum number of shares that can be created.
 const maxShareCount = 16
 // The length of the RS1024 checksum in words."""
