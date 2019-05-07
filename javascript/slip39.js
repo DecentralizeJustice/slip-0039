@@ -1,4 +1,4 @@
-
+let tools = require('./wordlist/indexByWords.js')
 function bitsToBytes (n) {
   return (n + 7) / 8
 }
@@ -37,3 +37,12 @@ const roundCount = 4
 const secretIndex = 255
 // The index of the share containing the digest of the shared secret."""
 const digestIndex = 254
+
+function wordIndex (word) {
+  let wordIndex = tools.indexByWords[word]
+  if (wordIndex === undefined) {
+    return Error('Invalid mnemonic word ' + word + '.')
+  }
+  return wordIndex
+}
+
