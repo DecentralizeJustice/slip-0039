@@ -1,4 +1,6 @@
 let tools = require('./wordlist/indexByWords.js')
+let tools1 = require('./wordlist/wordsByIndex.js')
+const crypto = require('crypto')
 function bitsToBytes (n) {
   return (n + 7) / 8
 }
@@ -45,4 +47,164 @@ function wordIndex (word) {
   }
   return wordIndex
 }
+function rs1024Polymod (values) {
+  const gen = [
+    0xE0E040,
+    0x1C1C080,
+    0x3838100,
+    0x7070200,
+    0xE0E0009,
+    0x1C0C2412,
+    0x38086C24,
+    0x3090FC48,
+    0x21B1F890,
+    0x3F3F120
+  ]
+  let chk = 1
+  for (let value of values) {
+    let b = chk >> 20
+    chk = (chk & 0xFFFFF) << 10 ^ value
+    for (var i = 0; i < 10; i++) {
+      if (((b >> i) & 1)) {
+        chk ^= gen[i]
+      } else {
+        chk ^= 0
+      }
+    }
+  }
+  return chk
+}
+function getBytleLiteral (word) {
+  let ascii = []
+  for (var i = 0; i < word.length; i++) {
+    let asci = word.charCodeAt(i)
+    ascii.push(asci)
+  }
+  return ascii
+}
+function getChecksumArray () {
+  let array = new Array(checksumLenghtWords)
+  array.fill(0)
+  return array
+}
 
+function rs1024CreateChecksum (data) {
+  const values = getBytleLiteral(customizationString) + data + getChecksumArray()
+  const polymod = rs1024Polymod(values) ^ 1
+  let retval = []
+  for (var i = checksumLenghtWords - 1; i > -1; i--) {
+    retval.push((polymod >> 10 * i) & 1023)
+  }
+  return retval
+}
+
+function rs1024VerifyChecksum (data) {
+  let retval = rs1024Polymod([customizationString] + [data])
+  if (retval === 1) {
+    return true
+  } else {
+    return false
+  }
+}
+function bytes () {
+  return 0
+}
+function xor (a, b) {
+  let ans = []
+  for (let i = 0; i < a.length; i++) {
+    ans.push(a[i] ^ b[i])
+  }
+  return bytes(ans)
+}
+// Converts a list of base 1024 indices in big endian order to an integer value
+function intFromIndices (indices) {
+  let value = 0
+  for (var index of indices) {
+    value = (value << radixBits) + index
+  }
+  return value
+}
+// Converts an integer value to indices in big endian order.
+function intToIndices (value, length, bits) {
+  const mask = (1 << bits) - 1
+  let returnval = []
+  for (let i = length; i > 0; i--) {
+    returnval[i] = (value >> (i * bits)) & mask
+  }
+  return returnval
+}
+function mnemonicFromIndices (indices) {
+  let mnemonic = ''
+  for (let indice of indices) {
+    mnemonic += tools1.wordsByIndex[indice]
+  }
+  return mnemonic
+}
+function mnemonicToIndices (mnemonic) {
+  let indices = []
+  for (let word of mnemonic) {
+    indices.push(wordIndex(word))
+  }
+}
+// The round function used internally by the Feistel cipher
+function roundFunction (i, passphrase, e, salt, r) {
+  return crypto.pbkdf2(bytes([i]) + passphrase, salt + r, (baseIterationCount << e), 64, 'HMAC_SHA256')
+}
+function getSalt (identifier) {
+  return customizationString + bytes(identifier)
+}
+function encrypt (masterSecret, passphrase, iterationExponent, identifier) {
+  let l = masterSecret[masterSecret.len - 2]
+  let r = masterSecret[masterSecret.len - 2]
+  let salt = getSalt(identifier)
+  // for i in range(ROUND_COUNT):
+  //     (l, r) = (
+  //         r,
+  //         xor(l, _round_function(i, passphrase, iteration_exponent, salt, r)),
+  //     )
+  return r + l
+}
+function decrypt (identifier, iterationExponent, encryptedMasterSecret, passphrase) {
+  let l = encryptedMasterSecret[encryptedMasterSecret.len - 2]
+  let r = encryptedMasterSecret[encryptedMasterSecret.len - 2]
+  let salt = getSalt(identifier)
+  // for i in range(ROUND_COUNT):
+  //     (l, r) = (
+  //         r,
+  //         xor(l, _round_function(i, passphrase, iteration_exponent, salt, r)),
+  //     )
+  return r + l
+}
+function createDigest (randomData, sharedSecret) {
+  return hmac.new(randomData, sharedSecret, hashlib.sha256).digest()  // :DIGEST_LENGTH_BYTES
+}
+function splitSecret (threshold, shareCount, sharedSecret) {
+  if (threshold < 1) {
+    return new Error('The requested threshold ({}) must be a positive integer.'.format(threshold))
+  }
+  if (threshold > shareCount) {
+    return new Error('The requested threshold ({}) must not exceed the number of shares ({}).'.format(
+      threshold, shareCount))
+  }
+  if (shareCount > maxShareCount) {
+    return new Error('The requested number of shares ({}) must not exceed {}.'.format(
+      shareCount, maxShareCount
+    ))
+  }
+  // If the threshold is 1, then the digest of the shared secret is not used.
+  if (threshold == 1){
+      return [(0, shared_secret)]
+    }
+
+  random_share_count = threshold - 2
+
+  shares = [(i, random.bytes(len(shared_secret))) for i in range(random_share_count)]
+
+  random_part = random.bytes(len(shared_secret) - DIGEST_LENGTH_BYTES)
+  digest = _create_digest(random_part, shared_secret)
+
+  base_shares = shares + [
+      (DIGEST_INDEX, digest + random_part),
+      (SECRET_INDEX, shared_secret),
+  ]
+}
