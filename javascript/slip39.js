@@ -192,19 +192,39 @@ function splitSecret (threshold, shareCount, sharedSecret) {
     ))
   }
   // If the threshold is 1, then the digest of the shared secret is not used.
-  if (threshold == 1){
-      return [(0, shared_secret)]
-    }
+  if (threshold === 1) {
+    return [(0, sharedSecret)]
+  }
+  const randomShareCount = threshold - 2
 
-  random_share_count = threshold - 2
+  // let shares = [(i, random.bytes(len(sharedSecret))) for i in range(randomShareCount)]
 
-  shares = [(i, random.bytes(len(shared_secret))) for i in range(random_share_count)]
+  const randomPart = random.bytes(len(sharedSecret) - digestLengthBytes)
+  const digest = createDigest(randomPart, sharedSecret)
 
-  random_part = random.bytes(len(shared_secret) - DIGEST_LENGTH_BYTES)
-  digest = _create_digest(random_part, shared_secret)
-
-  base_shares = shares + [
-      (DIGEST_INDEX, digest + random_part),
-      (SECRET_INDEX, shared_secret),
+  baseShares = shares + [
+      (digestIndex, digest + randomPart),
+      (secretIndex, sharedSecret)
   ]
+  // for i in range(random_share_count, shareCount):
+  //   shares.append((i, shamir.interpolate(baseShares, i)))
+
+  return shares
 }
+
+function recoverSecret (threshold, shares) {
+  // If the threshold is 1, then the digest of the shared secret is not used.
+  if (threshold === 1) {
+    return shares[0][1]
+  }
+  const sharedSecret = shamir.interpolate(shares, secretIndex)
+  const digestShare = shamir.interpolate(shares, digestIndex)
+  const digest = digestShare[digestLengthBytes]
+  const randomPart = digestShare[digestLengthBytes]
+
+  if (digest !== createDigest(randomPart, sharedSecret)) {
+    return new Error('Invalid digest of the shared secret.')
+  }
+  return sharedSecret
+}
+
