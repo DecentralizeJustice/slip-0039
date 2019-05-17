@@ -234,7 +234,7 @@ function groupPrefix (
   return (intToIndices(idExpInt, idExpLengthWords, radixBits)) +
         (groupIndex << 6) + ((groupThreshold - 1) << 2) + ((groupCount - 1) >> 2)
 }
-def encode_mnemonic(
+function encodeMnemonic(
     identifier,
     iteration_exponent,
     group_index,
@@ -243,28 +243,26 @@ def encode_mnemonic(
     member_index,
     member_threshold,
     value,
-):
-    """
-    Converts share data to a share mnemonic.
-    :param int identifier: The random identifier.
-    :param int iteration_exponent: The iteration exponent.
-    :param int group_index: The x coordinate of the group share.
-    :param int group_threshold: The number of group shares needed to reconstruct the encrypted master secret.
-    :param int group_count: The total number of groups in existence.
-    :param int member_index: The x coordinate of the member share in the given group.
-    :param int member_threshold: The number of member shares needed to reconstruct the group share.
-    :param value: The share value representing the y coordinates of the share.
-    :type value: Array of bytes.
-    :return: The share mnemonic.
-    :rtype: Array of bytes.
-    """
+){
+    // Converts share data to a share mnemonic.
+    // :param int identifier: The random identifier.
+    // :param int iteration_exponent: The iteration exponent.
+    // :param int group_index: The x coordinate of the group share.
+    // :param int group_threshold: The number of group shares needed to reconstruct the encrypted master secret.
+    // :param int group_count: The total number of groups in existence.
+    // :param int member_index: The x coordinate of the member share in the given group.
+    // :param int member_threshold: The number of member shares needed to reconstruct the group share.
+    // :param value: The share value representing the y coordinates of the share.
+    // :type value: Array of bytes.
+    // :return: The share mnemonic.
+    // :rtype: Array of bytes.
 
-    # Convert the share value from bytes to wordlist indices.
-    value_word_count = bits_to_words(len(value) * 8)
-    value_int = int.from_bytes(value, "big")
+    // Convert the share value from bytes to wordlist indices.
+    const valueWordCount = bits_to_words(len(value) * 8)
+    const valueInt = int.from_bytes(value, "big")
 
-    share_data = (
-        _group_prefix(
+    const shareData = (
+        groupPrefix(
             identifier, iteration_exponent, group_index, group_threshold, group_count
         )
         + (
@@ -274,24 +272,25 @@ def encode_mnemonic(
         )
         + tuple(_int_to_indices(value_int, value_word_count, RADIX_BITS))
     )
-    checksum = rs1024_create_checksum(share_data)
+    const checksum = rs1024_create_checksum(share_data)
 
     return mnemonic_from_indices(share_data + checksum)
+  }
 
 
-def decode_mnemonic(mnemonic):
-    """Converts a share mnemonic to share data."""
+function decodeMnemonic(mnemonic){
+    // Converts a share mnemonic to share data
 
-    mnemonic_data = tuple(mnemonic_to_indices(mnemonic))
+    const mnemonicData = tuple(mnemonicToIndices(mnemonic))
 
-    if len(mnemonic_data) < MIN_MNEMONIC_LENGTH_WORDS:
-        raise MnemonicError(
+    if (len(mnemonicData) < minMnemonicLengthWords){
+        return Error(
             "Invalid mnemonic length. The length of each mnemonic must be at least {} words.".format(
-                MIN_MNEMONIC_LENGTH_WORDS
+                minMnemonicLengthWords
             )
         )
-
-    padding_len = (RADIX_BITS * (len(mnemonic_data) - METADATA_LENGTH_WORDS)) % 16
+      }
+    const paddingLen = (radixBits * (len(mnemonicData) - METADATA_LENGTH_WORDS)) % 16
     if padding_len > 8:
         raise MnemonicError("Invalid mnemonic length.")
 
@@ -340,7 +339,7 @@ def decode_mnemonic(mnemonic):
         member_threshold + 1,
         value,
     )
-
+}
 
 def _decode_mnemonics(mnemonics):
     identifiers = set()
