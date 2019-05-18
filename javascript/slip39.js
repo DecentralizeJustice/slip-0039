@@ -258,23 +258,23 @@ function encodeMnemonic(
     // :rtype: Array of bytes.
 
     // Convert the share value from bytes to wordlist indices.
-    const valueWordCount = bits_to_words(len(value) * 8)
-    const valueInt = int.from_bytes(value, "big")
+    const valueWordCount = bitsToWords(len(value) * 8)
+    const valueInt = int.fromBytes(value, "big")
 
     const shareData = (
         groupPrefix(
-            identifier, iteration_exponent, group_index, group_threshold, group_count
+            identifier, iterationExponent, groupIndex, groupThreshold, groupCount
         )
         + (
-            (((group_count - 1) & 3) << 8)
-            + (member_index << 4)
-            + (member_threshold - 1),
+            (((groupCount - 1) & 3) << 8)
+            + (memberIndex << 4)
+            + (memberThreshold - 1),
         )
-        + tuple(_int_to_indices(value_int, value_word_count, RADIX_BITS))
+        + tuple(intToIndices(valueInt, valueWordCount, radixBits))
     )
-    const checksum = rs1024_create_checksum(share_data)
+    const checksum = rs1024CreateChecksum(shareData)
 
-    return mnemonic_from_indices(share_data + checksum)
+    return mnemonicFromIndices(shareData + checksum)
   }
 
 
@@ -290,96 +290,95 @@ function decodeMnemonic(mnemonic){
             )
         )
       }
-    const paddingLen = (radixBits * (len(mnemonicData) - METADATA_LENGTH_WORDS)) % 16
-    if padding_len > 8:
-        raise MnemonicError("Invalid mnemonic length.")
-
-    if not rs1024_verify_checksum(mnemonic_data):
-        raise MnemonicError(
-            'Invalid mnemonic checksum for "{} ...".'.format(
-                " ".join(mnemonic.split()[: ID_EXP_LENGTH_WORDS + 2])
-            )
+    const paddingLen = (radixBits * (len(mnemonicData) - metadataLengthWords )) % 16
+    if (paddingLen > 8){
+        return Error ("Invalid mnemonic length.")
+      }
+    if (!rs1024VerifyChecksum (mnemonicData)){
+        return Error (
+            'Invalid mnemonic checksum for "{} ...".'
         )
-
-    id_exp_int = _int_from_indices(mnemonic_data[:ID_EXP_LENGTH_WORDS])
-    identifier = id_exp_int >> ITERATION_EXP_LENGTH_BITS
-    iteration_exponent = id_exp_int & ((1 << ITERATION_EXP_LENGTH_BITS) - 1)
-    tmp = _int_from_indices(
-        mnemonic_data[ID_EXP_LENGTH_WORDS : ID_EXP_LENGTH_WORDS + 2]
+      }
+    const idExpInt = intFromIndices(mnemonicData[idExpLengthWords])
+    const identifier = idExpInt >> iterationExpLengthBits
+    const iterationExponent = idExpInt & ((1 << iterationExpLengthBits) - 1)
+    const tmp = intFromIndices(
+        mnemonicData[idExpLengthWords+ 2]
     )
-    group_index, group_threshold, group_count, member_index, member_threshold = _int_to_indices(
+    groupIndex, groupThreshold, groupCount, memberIndex, memberThreshold = intToIndices(
         tmp, 5, 4
     )
-    value_data = mnemonic_data[ID_EXP_LENGTH_WORDS + 2 : -CHECKSUM_LENGTH_WORDS]
+    const valueData = mnemonicData[idExpLengthWords+ 2 : -checksumLenghtWords]
 
-    if group_count < group_threshold:
-        raise MnemonicError(
+    if (groupCount < groupThreshold) {
+        return Error(
             'Invalid mnemonic "{} ...". Group threshold cannot be greater than group count.'.format(
-                " ".join(mnemonic.split()[: ID_EXP_LENGTH_WORDS + 2])
+                " ".join(mnemonic.split()[:idExpLengthWords + 2])
             )
         )
-
-    value_byte_count = bits_to_bytes(RADIX_BITS * len(value_data) - padding_len)
-    value_int = _int_from_indices(value_data)
-    if value_data[0] >= 1 << (RADIX_BITS - padding_len):
-        raise MnemonicError(
+      }
+    const valueByteCount = bitsToBytes(radixBits* len(valueData) - paddingLen)
+    const valueInt = intFromIndices(valueData)
+    if (valueData[0] >= 1 << ( radixBits - paddingLen)){
+        return Error(
             'Invalid mnemonic padding for "{} ...".'.format(
-                " ".join(mnemonic.split()[: ID_EXP_LENGTH_WORDS + 2])
+                " ".join(mnemonic.split()[:  idExpLengthWords + 2])
             )
         )
-    value = value_int.to_bytes(value_byte_count, "big")
+    }
+    const value = valueInt.to_bytes(valueByteCount, "big")
 
     return (
         identifier,
-        iteration_exponent,
-        group_index,
-        group_threshold + 1,
-        group_count + 1,
-        member_index,
-        member_threshold + 1,
+        iterationExponent,
+        groupIndex,
+        groupThreshold + 1,
+        groupCount + 1,
+        memberIndex,
+        memberThreshold + 1,
         value,
     )
 }
-
-def _decode_mnemonics(mnemonics):
-    identifiers = set()
-    iteration_exponents = set()
-    group_thresholds = set()
-    group_counts = set()
-    groups = {}  # { group_index : [member_threshold, set_of_member_shares] }
+function decodeMnemonics(mnemonics){
+    const identifiers = set()
+    const iteration_exponents = set()
+    const groupThresholds = set()
+    const groupCounts = set()
+    const groups = {}  //# { group_index : [member_threshold, set_of_member_shares] }
     for mnemonic in mnemonics:
         identifier, iteration_exponent, group_index, group_threshold, group_count, member_index, member_threshold, share_value = decode_mnemonic(
             mnemonic
         )
         identifiers.add(identifier)
-        iteration_exponents.add(iteration_exponent)
-        group_thresholds.add(group_threshold)
-        group_counts.add(group_count)
-        group = groups.setdefault(group_index, [member_threshold, set()])
-        if group[0] != member_threshold:
+        iterationExponents.add(iterationExponent)
+        groupThresholds.add(groupThreshold)
+        groupCounts.add(groupCount)
+        group = groups.setdefault(groupIndex, [memberThreshold, set()])
+        if (group[0] !== memberThreshold){
             raise MnemonicError(
                 "Invalid set of mnemonics. All mnemonics in a group must have the same member threshold."
             )
-        group[1].add((member_index, share_value))
+        }
+        group[1].add((memberIndex, shareValue))
 
-    if len(identifiers) != 1 or len(iteration_exponents) != 1:
-        raise MnemonicError(
+    if (len(identifiers) !== 1 or len(iterationExponents) !== 1){
+        return Error(
             "Invalid set of mnemonics. All mnemonics must begin with the same {} words.".format(
                 ID_EXP_LENGTH_WORDS
             )
         )
-
-    if len(group_thresholds) != 1:
-        raise MnemonicError(
+      }
+    if (len(groupThresholds) !== 1){
+        return Error(
             "Invalid set of mnemonics. All mnemonics must have the same group threshold."
         )
-
-    if len(group_counts) != 1:
-        raise MnemonicError(
+      }
+    if (len(groupCounts) !== 1){
+        return Error(
             "Invalid set of mnemonics. All mnemonics must have the same group count."
         )
-
-    for group_index, group in groups.items():
+      }
+    for groupIndex, group in groups.items():
         if len(set(share[0] for share in group[1])) != len(group[1]):
             raise MnemonicError(
                 "Invalid set of shares. Member indices in each group must be unique."
@@ -387,186 +386,196 @@ def _decode_mnemonics(mnemonics):
 
     return (
         identifiers.pop(),
-        iteration_exponents.pop(),
-        group_thresholds.pop(),
-        group_counts.pop(),
+        iterationExponents.pop(),
+        groupThresholds.pop(),
+        groupCounts.pop(),
         groups,
     )
+  }
+
+function generateRandomIdentifier(){
+    // Returns a randomly generated integer in the range 0, ... , 2**ID_LENGTH_BITS - 1.
+
+    const identifier = int.from_bytes(random.bytes(bitsToBytes(idLenghthBits)), "big")
+    return identifier & ((1 << idLenghthBits) - 1)
+  }
 
 
-def _generate_random_identifier():
-    """Returns a randomly generated integer in the range 0, ... , 2**ID_LENGTH_BITS - 1."""
+function generateMnemonics(
+    groupThreshold, groups, masterSecret, passphrase=b"", iterationExponent=0
+){
 
-    identifier = int.from_bytes(random.bytes(bits_to_bytes(ID_LENGTH_BITS)), "big")
-    return identifier & ((1 << ID_LENGTH_BITS) - 1)
+    // Splits a master secret into mnemonic shares using Shamir's secret sharing scheme.
+    // :param int group_threshold: The number of groups required to reconstruct the master secret.
+    // :param groups: A list of (member_threshold, member_count) pairs for each group, where member_count
+    //     is the number of shares to generate for the group and member_threshold is the number of members required to
+    //     reconstruct the group secret.
+    // :type groups: List of pairs of integers.
+    // :param master_secret: The master secret to split.
+    // :type master_secret: Array of bytes.
+    // :param passphrase: The passphrase used to encrypt the master secret.
+    // :type passphrase: Array of bytes.
+    // :param int iteration_exponent: The iteration exponent.
+    // :return: List of mnemonics.
+    // :rtype: List of byte arrays.
 
 
-def generate_mnemonics(
-    group_threshold, groups, master_secret, passphrase=b"", iteration_exponent=0
-):
-    """
-    Splits a master secret into mnemonic shares using Shamir's secret sharing scheme.
-    :param int group_threshold: The number of groups required to reconstruct the master secret.
-    :param groups: A list of (member_threshold, member_count) pairs for each group, where member_count
-        is the number of shares to generate for the group and member_threshold is the number of members required to
-        reconstruct the group secret.
-    :type groups: List of pairs of integers.
-    :param master_secret: The master secret to split.
-    :type master_secret: Array of bytes.
-    :param passphrase: The passphrase used to encrypt the master secret.
-    :type passphrase: Array of bytes.
-    :param int iteration_exponent: The iteration exponent.
-    :return: List of mnemonics.
-    :rtype: List of byte arrays.
-    """
-
-    identifier = _generate_random_identifier()
-    if len(master_secret) * 8 < MIN_STRENGTH_BITS:
+    const identifier = generateRandomIdentifier()
+    if (len(master_secret) * 8 <minStrengthBits){
             raise ValueError(
                 "The length of the master secret ({} bytes) must be at least {} bytes.".format(
-                    len(master_secret), bits_to_bytes(MIN_STRENGTH_BITS)
+                    len(masterSecret), bitsToBytes(minStrengthBits)
                 )
             )
+          }
 
-        if len(master_secret) % 2 != 0:
-            raise ValueError(
+        if (len(masterSecret) % 2 != 0){
+            return Error(
                 "The length of the master secret in bytes must be an even number."
             )
+          }
 
-        if not all(32 <= c <= 126 for c in passphrase):
-            raise ValueError(
+        if not all(32 <= c <= 126 for c in passphrase){
+            return Error(
                 "The passphrase must contain only printable ASCII characters (code points 32-126)."
             )
-
-        if group_threshold > len(groups):
-            raise ValueError(
+          }
+        if (groupThreshold > len(groups)){
+            return Error(
                 "The requested group threshold ({}) must not exceed the number of groups ({}).".format(
-                    group_threshold, len(groups)
+                    groupThreshold, len(groups)
                 )
             )
-
-        if any(
-            member_threshold == 1 and member_count > 1
-            for member_threshold, member_count in groups
-        ):
-            raise ValueError(
+          }
+        if (
+            memberThreshold == 1 and memberCount > 1
+            for memberThreshold, memberCount in groups
+        )
+            {
+              return Error(
                 "Creating multiple member shares with member threshold 1 is not allowed. Use 1-of-1 member sharing instead."
             )
-            encrypted_master_secret = _encrypt(
-                    master_secret, passphrase, iteration_exponent, identifier
+          }
+            const encryptedMastersecret = encrypt(
+                    masterSecret, passphrase, iterationExponent, identifier
                 )
 
-                group_shares = _split_secret(group_threshold, len(groups), encrypted_master_secret)
+                const groupShares = splitSecret(groupThreshold, len(groups), encryptedMasterSecret)
 
                 return [
                     [
                         encode_mnemonic(
                             identifier,
-                            iteration_exponent,
-                            group_index,
-                            group_threshold,
+                            iterationExponent,
+                            groupIndex,
+                            groupThreshold,
                             len(groups),
-                            member_index,
-                            member_threshold,
+                            memberIndex,
+                            memberThreshold,
                             value,
                         )
-                        for member_index, value in _split_secret(
-                            member_threshold, member_count, group_secret
+                        for memberIndex, value in splitSecret(
+                            memberThreshold, memberCount, groupSecret
                         )
                     ]
-                    for (member_threshold, member_count), (group_index, group_secret) in zip(
-                        groups, group_shares
+                    for (memberThreshold, memberCount), (groupIndex, groupSecret) in zip(
+                        groups, groupShares
                     )
                 ]
 
+}
+function generateMnemonicsRandom(
+    groupThreshold, groups
+){
+    const passphrase = ""
+    const iterationExponent = 0
+    const strengthBits = 128
+    // Generates a random master secret and splits it into mnemonic shares using Shamir's secret
+    // sharing scheme.
+    // :param int group_threshold: The number of groups required to reconstruct the master secret.
+    // :param groups: A list of (member_threshold, member_count) pairs for each group, where member_count
+    //     is the number of shares to generate for the group and member_threshold is the number of members required to
+    //     reconstruct the group secret.
+    // :type groups: List of pairs of integers.
+    // :param int strength_bits: The entropy of the randomly generated master secret in bits.
+    // :param passphrase: The passphrase used to encrypt the master secret.
+    // :type passphrase: Array of bytes.
+    // :param int iteration_exponent: The iteration exponent.
+    // :return: List of mnemonics.
+    // :rtype: List of byte arrays.
 
-            def generate_mnemonics_random(
-                group_threshold, groups, strength_bits=128, passphrase=b"", iteration_exponent=0
-            ):
-                """
-                Generates a random master secret and splits it into mnemonic shares using Shamir's secret
-                sharing scheme.
-                :param int group_threshold: The number of groups required to reconstruct the master secret.
-                :param groups: A list of (member_threshold, member_count) pairs for each group, where member_count
-                    is the number of shares to generate for the group and member_threshold is the number of members required to
-                    reconstruct the group secret.
-                :type groups: List of pairs of integers.
-                :param int strength_bits: The entropy of the randomly generated master secret in bits.
-                :param passphrase: The passphrase used to encrypt the master secret.
-                :type passphrase: Array of bytes.
-                :param int iteration_exponent: The iteration exponent.
-                :return: List of mnemonics.
-                :rtype: List of byte arrays.
-                """
+    if (strengthBits < minStrengthBits){
+        return Error(
+            "The requested strength of the master secret ({} bits) must be at least {} bits.".format(
+                strengthBits, MIN_STRENGTH_BITS
+            )
+        )
+      }
 
-                if strength_bits < MIN_STRENGTH_BITS:
-                    raise ValueError(
-                        "The requested strength of the master secret ({} bits) must be at least {} bits.".format(
-                            strength_bits, MIN_STRENGTH_BITS
-                        )
-                    )
+    if (strengthBits % 16 != 0){
+        return Error(
+            "The requested strength of the master secret ({} bits) must be a multiple of 16 bits.".format(
+                strengthBits
+            )
+        )
+      }
 
-                if strength_bits % 16 != 0:
-                    raise ValueError(
-                        "The requested strength of the master secret ({} bits) must be a multiple of 16 bits.".format(
-                            strength_bits
-                        )
-                    )
+    return generate_mnemonics(
+        groupThreshold,
+        groups,
+        random.bytes(strengthBits // 8),
+        passphrase,
+        iterationExponent,
+    )
+  }
 
-                return generate_mnemonics(
-                    group_threshold,
-                    groups,
-                    random.bytes(strength_bits // 8),
-                    passphrase,
-                    iteration_exponent,
-                )
+function combineMnemonics(mnemonics){
+
+  // Combines mnemonic shares to obtain the master secret which was previously split using
+  // Shamir's secret sharing scheme.
+  // :param mnemonics: List of mnemonics.
+  // :type mnemonics: List of byte arrays.
+  // :return: Identifier, iteration exponent, the encrypted master secret.
+  // :rtype: Integer, integer, array of bytes.
 
 
-            def combine_mnemonics(mnemonics):
-                """
-                Combines mnemonic shares to obtain the master secret which was previously split using
-                Shamir's secret sharing scheme.
-                :param mnemonics: List of mnemonics.
-                :type mnemonics: List of byte arrays.
-                :return: Identifier, iteration exponent, the encrypted master secret.
-                :rtype: Integer, integer, array of bytes.
-                """
+  if (!mnemonics){
+      return Error("The list of mnemonics is empty.")
+        }
+  identifier, iterationExponent, groupThreshold, groupCount, groups = _decode_mnemonics(
+      mnemonics
+  )
 
-                if not mnemonics:
-                    raise MnemonicError("The list of mnemonics is empty.")
 
-                identifier, iteration_exponent, group_threshold, group_count, groups = _decode_mnemonics(
-                    mnemonics
-                )
+  if (len(groups) !== groupThreshold){
+      raise MnemonicError(
+          "Wrong number of mnemonic groups. Expected {} groups, but {} were provided.".format(
+              groupThreshold, len(groups)
+          )
+      )
+    }
+  for group_index, group in groups.items(){
+      if len(group[1]) != group[0]:
+          prefix = _group_prefix(
+              identifier,
+              iteration_exponent,
+              group_index,
+              group_threshold,
+              group_count,
+          )
+          raise MnemonicError(
+              'Wrong number of mnemonics. Expected {} mnemonics starting with "{} ...", but {} were provided.'.format(
+                  group[0], mnemonic_from_indices(prefix), len(group[1])
+              )
+          )
+        }
+  groupShares = [
+      (groupIndex, recoverSecret(group[0], list(group[1])))
+      for group_index, group in groups.items()
+  ]
 
-                if len(groups) != group_threshold:
-                    raise MnemonicError(
-                        "Wrong number of mnemonic groups. Expected {} groups, but {} were provided.".format(
-                            group_threshold, len(groups)
-                        )
-                    )
-
-                for group_index, group in groups.items():
-                    if len(group[1]) != group[0]:
-                        prefix = _group_prefix(
-                            identifier,
-                            iteration_exponent,
-                            group_index,
-                            group_threshold,
-                            group_count,
-                        )
-                        raise MnemonicError(
-                            'Wrong number of mnemonics. Expected {} mnemonics starting with "{} ...", but {} were provided.'.format(
-                                group[0], mnemonic_from_indices(prefix), len(group[1])
-                            )
-                        )
-
-                group_shares = [
-                    (group_index, _recover_secret(group[0], list(group[1])))
-                    for group_index, group in groups.items()
-                ]
-
-                return (
-                    identifier,
-                    iteration_exponent,
-                    _recover_secret(group_threshold, group_shares),
+  return (
+      identifier,
+      iterationExponent,
+      recoverSecret(groupThreshold, groupShares))
+  }
