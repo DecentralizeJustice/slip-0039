@@ -3,7 +3,7 @@
 // const crypto = require('crypto')
 const randomBytes = require('./random.js')
 function bitsToBytes (n) {
-  return (n + 7) / 8
+  return Math.floor((n + 7) / 8)
 }
 function bitsToWords (n) {
   return (n + radixBits - 1) // RADIX_BITS

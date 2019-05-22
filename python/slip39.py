@@ -25,7 +25,7 @@
 #
 # class MnemonicError(Exception):
 #     pass
-
+from random import random_bytes
 
 def bits_to_bytes(n):
     return (n + 7) // 8
@@ -435,10 +435,8 @@ def word_index(word):
 def _generate_random_identifier():
     """Returns a randomly generated integer in the range 0, ... , 2**ID_LENGTH_BITS - 1."""
 
-    identifier = int.from_bytes(random.bytes(bits_to_bytes(ID_LENGTH_BITS)), "big")
+    identifier = int.from_bytes(random_bytes(bits_to_bytes(ID_LENGTH_BITS)), "big")
     return identifier & ((1 << ID_LENGTH_BITS) - 1)
-
-
 # def generate_mnemonics(
 #     group_threshold, groups, master_secret, passphrase=b"", iteration_exponent=0
 # ):
