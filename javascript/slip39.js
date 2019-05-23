@@ -1,7 +1,7 @@
 // let tools = require('./wordlist/indexByWords.js')
 // let tools1 = require('./wordlist/wordsByIndex.js')
 // const crypto = require('crypto')
-const randomBytes = require('./random.js')
+const randomBytes = require('./random/random.js')
 function bitsToBytes (n) {
   return Math.floor((n + 7) / 8)
 }
@@ -409,7 +409,6 @@ function generateRandomIdentifier () {
   const identifier = bytesToInt(randomBytes.randomBytes(bitsToBytes(idLenghthBits)))
   return identifier & ((1 << idLenghthBits) - 1)
 }
-console.log(generateRandomIdentifier())
 // function generateMnemonics(
 //     groupThreshold, groups, masterSecret, passphrase=b"", iterationExponent=0
 // ){
@@ -588,3 +587,6 @@ console.log(generateRandomIdentifier())
 //       iterationExponent,
 //       recoverSecret(groupThreshold, groupShares))
 //   }
+module.exports = {
+  generateRandomIdentifier
+}
