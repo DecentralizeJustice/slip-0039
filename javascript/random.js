@@ -8,22 +8,23 @@ async function getJsonEntropy () {
   const data = await JSON.parse(test)
   return data.entropy
 }
-async function getEntropyCount () {
-  const test = await fsRead('./javascript/usedEntropy.json', 'utf8')
-  const data = await JSON.parse(test)
+async function getUsedEntropyCount () {
+  let test = await fsRead('./javascript/usedEntropy.json', 'utf8')
+  let data = await JSON.parse(test)
   return data.count
 }
-async function updateEntropyCount (newCount) {
-  const newCountObject = { 'count': newCount }
-  await fsWrite('./javascript/usedEntropy.json', JSON.stringify(newCountObject))
+async function updateUsedEntropyCount (newCount) {
+  let newCountObject = { 'count': newCount }
+  newCountObject = await JSON.stringify(newCountObject)
+  await fsWrite('./javascript/usedEntropy.json', newCountObject)
 }
 
 async function randomBytes (byteNum) {
   const bytes = await getJsonEntropy()
   let byteArray = []
   for (var i = 0; i < byteNum; i++) {
-    const count = await getEntropyCount()
-    await updateEntropyCount(count + 1)
+    let count = await getUsedEntropyCount()
+    await updateUsedEntropyCount(count + 1)
     byteArray.push(bytes[count])
   }
   return byteArray

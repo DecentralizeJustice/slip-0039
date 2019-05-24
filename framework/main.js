@@ -1,9 +1,8 @@
 const test0 = require('./test/test0')
 async function main () {
-  test0.test().then(result => {
+  for (var i = 0; i < 100; i++) {
+    const result = await test0.test()
     console.log(result)
-  })
+  }
 }
-for (var i = 0; i < 3; i++) {
-  main()
-}
+main()
