@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "chalk": "^2.4.2",
     "python-shell": "^1.0.7",
     "random-number-csprng": "^1.0.2"
   }

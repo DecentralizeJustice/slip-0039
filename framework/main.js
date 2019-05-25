@@ -1,8 +1,5 @@
-const test0 = require('./test/test0')
+const generateRandomIdentifier = require('./test/generateRandomIdentifier')
 async function main () {
-  for (var i = 0; i < 100; i++) {
-    const result = await test0.test()
-    console.log(result)
-  }
+  await generateRandomIdentifier.test()
 }
 main()
