@@ -1,22 +1,31 @@
 const utilities = require('../utilities')
-
+const slip39 = require('../../javascript/slip39')
 const numberOfTest = 32
+const entropyBitsNeeded = 2
+const javascriptName = 'generateRandomIdentifier'
+const pythonName = 'generate_random_identifier.py'
 
-async function test () {
+async function runTest (entropyBitsNeeded, pythonName, func) {
   let passedTest = []
   for (var i = 0; i < numberOfTest; i++) {
-    const result = await loop()
+    const result = await loopWithEntropy(entropyBitsNeeded, pythonName, func)
     passedTest.push(result)
   }
   const sucess = await utilities.checkPassedTest(passedTest, numberOfTest)
-  await utilities.logResult('generateRandomIdentifier', sucess, numberOfTest)
+  await utilities.logResult(javascriptName, sucess, numberOfTest)
 }
-async function loop () {
-  const oracle = await utilities.python('generate_random_identifier.py',
-    utilities.options)
-  const javascript = await utilities.slip39.generateRandomIdentifier()
+
+async function loopWithEntropy (neededBits, pythName, func) {
+  await utilities.seedEntropyPool(neededBits)
   await utilities.resetEntropyCounts()
-  await utilities.seedEntropyPool(2)
+  const oracle = await utilities.python(pythName,
+    utilities.options)
+  const javascript = await func()
+  await utilities.resetEntropyCounts()
   return (oracle[0] === javascript)
 }
-module.exports = { test }
+
+module.exports.runTest = async function () {
+  const func = await runTest(entropyBitsNeeded, pythonName, slip39.generateRandomIdentifier)
+  return func
+}

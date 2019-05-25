@@ -5,7 +5,6 @@ const randNum = util.promisify(randomNumber)
 const fsWrite = util.promisify(fs.writeFile)
 const log = console.log
 const chalk = require('chalk')
-const slip39 = require('../javascript/slip39')
 const { PythonShell } = require('python-shell')
 const python = util.promisify(PythonShell.run)
 const options = {
@@ -51,6 +50,5 @@ module.exports = { resetEntropyCounts,
   seedEntropyPool,
   checkPassedTest,
   logResult,
-  slip39,
   options,
   python }
