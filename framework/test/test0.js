@@ -13,7 +13,7 @@ async function test (numb) {
   const oracle = await python('generate_random_identifier.py', options)
   const javascript = await slip39.generateRandomIdentifier()
   await utilities.resetEntropyCounts()
+  await utilities.seedEntropyPool(2)
   return (oracle[0] === javascript)
-  //
 }
 module.exports = { test }
