@@ -48,7 +48,8 @@ async function logResult (funcName, sucess, numberOfTest) {
   }
 }
 
-async function loopWithEntropy (neededBits, pythName, javascriptFunc, compareFunction) {
+async function loopWithEntropy (neededBits, pythName,
+  javascriptFunc, compareFunction) {
   await seedEntropyPool(neededBits)
   await resetEntropyCounts()
   const pythonOutput = await runPython(pythName,
@@ -58,25 +59,40 @@ async function loopWithEntropy (neededBits, pythName, javascriptFunc, compareFun
   return compareFunction(pythonOutput, javascriptOutput)
 }
 
+async function loopWithInt (neededBits, pythName,
+  javascriptFunc, compareFunction) {
+  const randomInt = await genInt()
+  const randomIntOptions = Object.assign({ args: [randomInt] }, options)
+  const pythonOutput = await runPython(pythName,
+    randomIntOptions)
+  const javascriptOutput = await javascriptFunc(randomInt)
+  return compareFunction(pythonOutput, javascriptOutput)
+}
+
+async function genInt () {
+  const randomNum = await randNum(0, 255)
+  return randomNum
+}
+
 async function runTest (entropyBytesNeeded, numberOfTest, pythonName,
   javascriptFunc, compareFunction) {
   const javascriptName = javascriptFunc.name
   let passedTest = []
-  if (entropyBytesNeeded !== 0) {
-    for (var i = 0; i < numberOfTest; i++) {
-      const result = await loopWithEntropy(entropyBytesNeeded,
+  for (var i = 0; i < numberOfTest; i++) {
+    let result
+    if (entropyBytesNeeded !== 0) {
+      result = await loopWithEntropy(entropyBytesNeeded,
         pythonName, javascriptFunc, compareFunction)
-      passedTest.push(result)
+    } else {
+      result = await loopWithInt(entropyBytesNeeded,
+        pythonName, javascriptFunc, compareFunction)
     }
+    passedTest.push(result)
   }
   const sucess = await checkPassedTest(passedTest, numberOfTest)
   await logResult(javascriptName, sucess, numberOfTest)
 }
 
-async function compareFunction (pythonOutput, javascriptOutput) {
-  return pythonOutput[0] === javascriptOutput
-}
 module.exports = {
   runTest,
-  compareFunction,
   slip39 }

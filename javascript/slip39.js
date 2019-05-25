@@ -6,7 +6,7 @@ function bitsToBytes (n) {
   return Math.floor((n + 7) / 8)
 }
 function bitsToWords (n) {
-  return (n + radixBits - 1) // RADIX_BITS
+  return Math.floor((n + radixBits - 1) / radixBits)
 }
 // Assumes Big Endian byte array
 function bytesToInt (byteArray) {
@@ -589,5 +589,7 @@ async function generateRandomIdentifier () {
 //       recoverSecret(groupThreshold, groupShares))
 //   }
 module.exports = {
-  generateRandomIdentifier
+  generateRandomIdentifier,
+  bitsToBytes,
+  bitsToWords
 }
