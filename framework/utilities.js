@@ -6,7 +6,8 @@ const fsWrite = util.promisify(fs.writeFile)
 const log = console.log
 const chalk = require('chalk')
 const { PythonShell } = require('python-shell')
-const python = util.promisify(PythonShell.run)
+const runPython = util.promisify(PythonShell.run)
+const slip39 = require('../javascript/slip39')
 const options = {
   mode: 'json',
   scriptPath: 'python/test'
@@ -46,9 +47,36 @@ async function logResult (funcName, sucess, numberOfTest) {
     log(`${funcName} ` + chalk.bgRed('failed'))
   }
 }
-module.exports = { resetEntropyCounts,
-  seedEntropyPool,
-  checkPassedTest,
-  logResult,
-  options,
-  python }
+
+async function loopWithEntropy (neededBits, pythName, javascriptFunc, compareFunction) {
+  await seedEntropyPool(neededBits)
+  await resetEntropyCounts()
+  const pythonOutput = await runPython(pythName,
+    options)
+  const javascriptOutput = await javascriptFunc()
+  await resetEntropyCounts()
+  return compareFunction(pythonOutput, javascriptOutput)
+}
+
+async function runTest (entropyBytesNeeded, numberOfTest, pythonName,
+  javascriptFunc, compareFunction) {
+  const javascriptName = javascriptFunc.name
+  let passedTest = []
+  if (entropyBytesNeeded !== 0) {
+    for (var i = 0; i < numberOfTest; i++) {
+      const result = await loopWithEntropy(entropyBytesNeeded,
+        pythonName, javascriptFunc, compareFunction)
+      passedTest.push(result)
+    }
+  }
+  const sucess = await checkPassedTest(passedTest, numberOfTest)
+  await logResult(javascriptName, sucess, numberOfTest)
+}
+
+async function compareFunction (pythonOutput, javascriptOutput) {
+  return pythonOutput[0] === javascriptOutput
+}
+module.exports = {
+  runTest,
+  compareFunction,
+  slip39 }
