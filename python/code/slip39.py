@@ -19,14 +19,13 @@
 #
 
 # from trezor.crypto import hashlib, hmac, pbkdf2, random
-# from trezor.crypto.slip39_wordlist import wordlist
+from util import wordlist
 # from trezorcrypto import shamir
 #
 #
 # class MnemonicError(Exception):
 #     pass
 from random_source import random_bytes
-
 def bits_to_bytes(n):
     return (n + 7) // 8
 

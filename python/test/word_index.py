@@ -5,4 +5,5 @@ module_dir = os.path.dirname(__file__)
 sys.path.append(os.path.join(module_dir, '../code/'))
 from slip39 import word_index
 
-print(word_index(int(sys.argv[1])))
+print(word_index('acid'))
+#sys.argv[1]

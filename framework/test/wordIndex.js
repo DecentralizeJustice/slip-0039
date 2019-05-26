@@ -11,11 +11,11 @@ async function comparingFunction (pythonOutput, javascriptOutput) {
 }
 
 async function testFunction () {
-  const randomInt = await utilities.genInt(0, 255)
-  const randomIntOptions = Object.assign({ args: [randomInt] }, utilities.options)
+  const randomWord = 'acid'// await utilities.genInt(0, 255)
+  const randomIntOptions = Object.assign({ args: [randomWord] }, utilities.options)
   const pythonOutput = await utilities.runPython(pythonName,
     randomIntOptions)
-  const javascriptOutput = await javaFunc(randomInt)
+  const javascriptOutput = await javaFunc(randomWord)
   return comparingFunction(pythonOutput, javascriptOutput)
 }
 
