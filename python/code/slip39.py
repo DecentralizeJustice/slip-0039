@@ -84,18 +84,18 @@ DIGEST_INDEX = 254
 """The index of the share containing the digest of the shared secret."""
 
 
-# def word_index(word):
-#     lo = 0
-#     hi = len(wordlist)
-#     while hi - lo > 1:
-#         mid = (hi + lo) // 2
-#         if wordlist[mid] > word:
-#             hi = mid
-#         else:
-#             lo = mid
-#     if not wordlist[lo].startswith(word):
-#         raise MnemonicError('Invalid mnemonic word "{}".'.format(word))
-#     return lo
+def word_index(word):
+    lo = 0
+    hi = len(wordlist)
+    while hi - lo > 1:
+        mid = (hi + lo) // 2
+        if wordlist[mid] > word:
+            hi = mid
+        else:
+            lo = mid
+    if not wordlist[lo].startswith(word):
+        raise MnemonicError('Invalid mnemonic word "{}".'.format(word))
+    return lo
 
 
 # def _rs1024_polymod(values):
