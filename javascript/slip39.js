@@ -1,4 +1,4 @@
-// let tools = require('./wordlist/indexByWords.js')
+const tools = require('./wordlist/indexByWords.js')
 // let tools1 = require('./wordlist/wordsByIndex.js')
 // const crypto = require('crypto')
 const randomBytes = require('./random.js')
@@ -51,13 +51,13 @@ const secretIndex = 255
 // The index of the share containing the digest of the shared secret."""
 const digestIndex = 254
 
-// function wordIndex (word) {
-//   let wordIndex = tools.indexByWords[word]
-//   if (wordIndex === undefined) {
-//     return Error('Invalid mnemonic word ' + word + '.')
-//   }
-//   return wordIndex
-// }
+function wordIndex (word) {
+  const wordIndex = tools.indexByWords[word]
+  if (wordIndex === undefined) {
+    return Error('Invalid mnemonic word ' + word + '.')
+  }
+  return wordIndex
+}
 // function rs1024Polymod (values) {
 //   const gen = [
 //     0xE0E040,
@@ -591,5 +591,6 @@ async function generateRandomIdentifier () {
 module.exports = {
   generateRandomIdentifier,
   bitsToBytes,
-  bitsToWords
+  bitsToWords,
+  wordIndex
 }

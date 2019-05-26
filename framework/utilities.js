@@ -48,51 +48,26 @@ async function logResult (funcName, sucess, numberOfTest) {
   }
 }
 
-async function loopWithEntropy (neededBits, pythName,
-  javascriptFunc, compareFunction) {
-  await seedEntropyPool(neededBits)
-  await resetEntropyCounts()
-  const pythonOutput = await runPython(pythName,
-    options)
-  const javascriptOutput = await javascriptFunc()
-  await resetEntropyCounts()
-  return compareFunction(pythonOutput, javascriptOutput)
-}
-
-async function loopWithInt (neededBits, pythName,
-  javascriptFunc, compareFunction) {
-  const randomInt = await genInt()
-  const randomIntOptions = Object.assign({ args: [randomInt] }, options)
-  const pythonOutput = await runPython(pythName,
-    randomIntOptions)
-  const javascriptOutput = await javascriptFunc(randomInt)
-  return compareFunction(pythonOutput, javascriptOutput)
-}
-
-async function genInt () {
-  const randomNum = await randNum(0, 255)
+async function genInt (min, top) {
+  const randomNum = await randNum(min, top)
   return randomNum
 }
 
-async function runTest (entropyBytesNeeded, numberOfTest, pythonName,
-  javascriptFunc, compareFunction) {
-  const javascriptName = javascriptFunc.name
+async function runTest (numberOfTest, javaName, testFunction) {
   let passedTest = []
   for (var i = 0; i < numberOfTest; i++) {
-    let result
-    if (entropyBytesNeeded !== 0) {
-      result = await loopWithEntropy(entropyBytesNeeded,
-        pythonName, javascriptFunc, compareFunction)
-    } else {
-      result = await loopWithInt(entropyBytesNeeded,
-        pythonName, javascriptFunc, compareFunction)
-    }
+    const result = await testFunction()
     passedTest.push(result)
   }
   const sucess = await checkPassedTest(passedTest, numberOfTest)
-  await logResult(javascriptName, sucess, numberOfTest)
+  await logResult(javaName, sucess, numberOfTest)
 }
 
 module.exports = {
   runTest,
-  slip39 }
+  slip39,
+  genInt,
+  runPython,
+  options,
+  seedEntropyPool,
+  resetEntropyCounts }

@@ -2,3 +2,5 @@
 **/build
 **.pyc
 _pycache_/
+entropyPool.json
+usedEntropy.json
