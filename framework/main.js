@@ -12,9 +12,9 @@ async function main () {
   }
 }
 async function loopFunc () {
-  // await bitsToBytes.runTest()
-  // await bitsToWords.runTest()
-  // await generateRandomIdentifier.runTest()
+  await bitsToBytes.runTest()
+  await bitsToWords.runTest()
+  await generateRandomIdentifier.runTest()
   await wordIndex.runTest()
 }
 main()

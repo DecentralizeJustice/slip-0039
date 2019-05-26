@@ -23,8 +23,7 @@ from util import wordlist
 # from trezorcrypto import shamir
 #
 #
-# class MnemonicError(Exception):
-#     pass
+
 from random_source import random_bytes
 def bits_to_bytes(n):
     return (n + 7) // 8
@@ -93,7 +92,7 @@ def word_index(word):
         else:
             lo = mid
     if not wordlist[lo].startswith(word):
-        raise MnemonicError('Invalid mnemonic word "{}".'.format(word))
+        return ('Invalid mnemonic word "{}".'.format(word))
     return lo
 
 

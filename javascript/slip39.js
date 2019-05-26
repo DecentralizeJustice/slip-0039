@@ -18,6 +18,12 @@ function bytesToInt (byteArray) {
   }
   return int
 }
+class MnemonicError extends Error {
+  constructor (message) {
+    super(message)
+    this.name = 'MnemonicError'
+  }
+}
 // The length of the radix in bits.
 const radixBits = 10
 // The number of words in the wordlist.
@@ -54,7 +60,7 @@ const digestIndex = 254
 function wordIndex (word) {
   const wordIndex = tools.indexByWords[word]
   if (wordIndex === undefined) {
-    return Error('Invalid mnemonic word ' + word + '.')
+    return new MnemonicError('Invalid mnemonic word ' + word + '.')
   }
   return wordIndex
 }
