@@ -2,8 +2,11 @@
   "dependencies": {
     "chalk": "^2.4.2",
     "python-shell": "^1.0.7",
-    "random-number-csprng": "^1.0.2"
-  }, "scripts" : {
-    "testFinite" : "node framework/main.js" ,
-    "testLoop" : "node framework/main.js -loop" }
+    "random-number-csprng": "^1.0.2",
+    "randomstring": "^1.1.5"
+  },
+  "scripts": {
+    "testFinite": "node framework/main.js",
+    "testLoop": "node framework/main.js -loop"
+  }
 }

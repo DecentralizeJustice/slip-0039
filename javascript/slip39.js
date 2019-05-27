@@ -91,14 +91,14 @@ function wordIndex (word) {
 //   }
 //   return chk
 // }
-// function getBytleLiteral (word) {
-//   let ascii = []
-//   for (var i = 0; i < word.length; i++) {
-//     let asci = word.charCodeAt(i)
-//     ascii.push(asci)
-//   }
-//   return ascii
-// }
+function getBytleLiteral (word) {
+  let ascii = []
+  for (var i = 0; i < word.length; i++) {
+    let asci = word.charCodeAt(i)
+    ascii.push(asci)
+  }
+  return ascii
+}
 // function getChecksumArray () {
 //   let array = new Array(checksumLenghtWords)
 //   array.fill(0)
@@ -598,5 +598,6 @@ module.exports = {
   generateRandomIdentifier,
   bitsToBytes,
   bitsToWords,
-  wordIndex
+  wordIndex,
+  getBytleLiteral
 }

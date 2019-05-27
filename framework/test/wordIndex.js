@@ -3,6 +3,7 @@ const wordlist = require('../../javascript/wordlist/wordsByIndex')
 const numberOfTest = 32
 const pythonName = 'word_index.py'
 const javaFunc = utilities.slip39.wordIndex
+const randomstring = require('randomstring')
 
 async function comparingFunction (pythonOutput, javascriptOutput) {
   const output = (pythonOutput[0] === javascriptOutput.toString())
@@ -24,7 +25,11 @@ async function testFunction () {
     randomWord = wordlist.wordsByIndex[randomInt]
     randomWordOptions.args = [randomWord]
   } else {
-    randomWord = randomInt.toString()
+    const length = await utilities.genInt(4, 8)
+    randomWord = randomstring.generate({
+      length: length,
+      charset: 'alphabetic'
+    })
     randomWordOptions.args = [randomWord]
   }
   const pythonOutput = await utilities.runPython(pythonName,
