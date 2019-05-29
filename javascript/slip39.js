@@ -1,5 +1,5 @@
 const tools = require('./wordlist/indexByWords.js')
-// let tools1 = require('./wordlist/wordsByIndex.js')
+
 // const crypto = require('crypto')
 const randomBytes = require('./random.js')
 function bitsToBytes (n) {
