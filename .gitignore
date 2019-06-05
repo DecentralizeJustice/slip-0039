@@ -4,3 +4,4 @@
 _pycache_/
 entropyPool.json
 usedEntropy.json
+**.DS_Store

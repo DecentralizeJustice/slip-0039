@@ -598,6 +598,5 @@ module.exports = {
   generateRandomIdentifier,
   bitsToBytes,
   bitsToWords,
-  wordIndex,
-  getBytleLiteral
+  wordIndex
 }
